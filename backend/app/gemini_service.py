@@ -3,7 +3,8 @@ import json
 import re
 import time
 from typing import Dict, Any, List, Optional
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from fastapi import HTTPException
 from dotenv import load_dotenv
 
@@ -18,8 +19,7 @@ class GeminiService:
     def __init__(self):
         self.api_key = os.getenv("GEMINI_API_KEY", "").strip()
         self.model_name = os.getenv("GEMINI_MODEL", "gemini-3.6-flash").strip()
-        if self.api_key:
-            genai.configure(api_key=self.api_key)
+        self.client = genai.Client(api_key=self.api_key) if self.api_key else None
 
     def _ensure_api_key(self):
         if not self.api_key:
@@ -27,7 +27,7 @@ class GeminiService:
             load_dotenv()
             self.api_key = os.getenv("GEMINI_API_KEY", "").strip()
             if self.api_key:
-                genai.configure(api_key=self.api_key)
+                self.client = genai.Client(api_key=self.api_key)
             else:
                 raise HTTPException(
                     status_code=500,
@@ -51,15 +51,15 @@ class GeminiService:
 
         for attempt in range(max_retries + 1):
             try:
-                model = genai.GenerativeModel(
-                    model_name=self.model_name,
-                    system_instruction=system_instruction,
-                    generation_config={
-                        "temperature": 0.2,
-                        "response_mime_type": "application/json"
-                    }
+                response = self.client.models.generate_content(
+                    model=self.model_name,
+                    contents=user_content,
+                    config=types.GenerateContentConfig(
+                        system_instruction=system_instruction,
+                        temperature=0.2,
+                        response_mime_type="application/json"
+                    )
                 )
-                response = model.generate_content(user_content)
                 if response and response.text:
                     return response.text
                 raise ValueError("Empty response returned by Gemini model.")

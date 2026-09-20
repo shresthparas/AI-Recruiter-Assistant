@@ -61,6 +61,39 @@ A full-stack candidate sourcing and calibration engine. This application takes a
 - Python 3.10+
 - Node.js 18+ and npm
 
+### 2. Create and activate a virtual environment
+
+From the project root, create a virtual environment for the backend:
+
+```bash
+cd backend
+python -m venv .venv
+```
+
+Activate it on Windows PowerShell:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+Activate it on macOS/Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+When the environment is active, install the backend dependencies:
+
+```bash
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+To leave the virtual environment later, run:
+
+```bash
+deactivate
+```
 
 
 Set the environment variable or create `backend/.env`:
@@ -79,9 +112,6 @@ PORT=8000
 ```bash
 # Navigate to backend directory
 cd backend
-
-# Install dependencies
-pip install -r requirements.txt
 
 # Start FastAPI server
 uvicorn app.main:app --reload --port 8000
